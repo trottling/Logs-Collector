@@ -33,6 +33,12 @@ func (h *Handler) handleAddLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := h.es.IndexLog(entry); err != nil {
+		h.log.Error("failed to index log", zap.Error(err))
+		h.respond(w, http.StatusInternalServerError, map[string]string{"error": "failed to store log"})
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 }
 
