@@ -1,0 +1,1 @@
+module log_stash_lite
