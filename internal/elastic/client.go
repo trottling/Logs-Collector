@@ -1,6 +1,10 @@
 package elastic
 
 import (
+	"bytes"
+	"encoding/json"
+	"time"
+
 	"github.com/elastic/go-elasticsearch/v9"
 	"go.uber.org/zap"
 )
@@ -18,4 +22,26 @@ func NewClient(url string, log *zap.Logger) (*Client, error) {
 		return nil, err
 	}
 	return &Client{ES: es, Log: log}, nil
+}
+
+func (c *Client) IndexLog(entry map[string]interface{}) error {
+	entry["timestamp"] = time.Now().UTC()
+	data, err := json.Marshal(entry)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.ES.Index("logs", bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		c.Log.Error("failed to index log", zap.String("status", res.Status()))
+		return err
+	}
+
+	c.Log.Info("log indexed")
+	return nil
 }
