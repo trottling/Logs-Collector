@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log_stash_lite/internal/api/handlers"
 	"log_stash_lite/internal/parser"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 
-	"log_stash_lite/internal/api"
 	"log_stash_lite/internal/config"
 	"log_stash_lite/internal/elastic"
 	"log_stash_lite/internal/logger"
@@ -24,7 +24,7 @@ func main() {
 	}
 
 	r := chi.NewRouter()
-	h := api.NewHandler(log, es, pr)
+	h := handlers.NewHandler(log, es, pr)
 	h.RegisterRoutes(r)
 
 	log.Info("starting server", zap.String("addr", cfg.ListenAddr))
