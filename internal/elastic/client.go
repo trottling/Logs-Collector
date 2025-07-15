@@ -3,7 +3,6 @@ package elastic
 import (
 	"bytes"
 	"encoding/json"
-	"time"
 
 	"github.com/elastic/go-elasticsearch/v9"
 	"go.uber.org/zap"
@@ -25,7 +24,6 @@ func NewClient(url string, log *zap.Logger) (*Client, error) {
 }
 
 func (c *Client) IndexLog(entry map[string]interface{}) error {
-	entry["timestamp"] = time.Now().UTC()
 	data, err := json.Marshal(entry)
 	if err != nil {
 		return err
