@@ -10,5 +10,5 @@ func (h *Handler) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	}
 	defer res.Body.Close()
 
-	h.respond(w, http.StatusOK, map[string]string{"status": "ok"})
+	h.respond(w, http.StatusOK, okResp)
 }

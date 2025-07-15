@@ -32,5 +32,5 @@ func (h *Handler) handleAddLog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.respond(w, http.StatusCreated, map[string]string{"status": "ok"})
+	h.respond(w, http.StatusCreated, okResp)
 }
