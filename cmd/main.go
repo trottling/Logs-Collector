@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log_stash_lite/internal/parser"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -16,13 +17,14 @@ import (
 func main() {
 	cfg := config.Load()
 	log := logger.New()
+	pr := parser.New(log)
 	es, err := elastic.NewClient(cfg.ElasticURL, log)
 	if err != nil {
 		log.Fatal("failed to create elastic client", zap.Error(err))
 	}
 
 	r := chi.NewRouter()
-	h := api.NewHandler(log, es)
+	h := api.NewHandler(log, es, pr)
 	h.RegisterRoutes(r)
 
 	log.Info("starting server", zap.String("addr", cfg.ListenAddr))
