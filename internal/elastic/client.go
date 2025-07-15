@@ -24,6 +24,12 @@ func NewClient(url string, log *zap.Logger) (*Client, error) {
 }
 
 func (c *Client) IndexLog(entry map[string]interface{}) error {
+	rawData, err := json.Marshal(entry)
+	if err != nil {
+		return err
+	}
+	entry["raw"] = string(rawData)
+
 	data, err := json.Marshal(entry)
 	if err != nil {
 		return err
