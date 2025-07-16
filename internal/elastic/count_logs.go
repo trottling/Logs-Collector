@@ -19,20 +19,16 @@ func (c *Client) CountLogs(filters map[string]string) (int, error) {
 		})
 	}
 
-	// Build query
-	query := map[string]interface{}{
-		"query": map[string]interface{}{
-			"bool": map[string]interface{}{
-				"must": must,
-			},
-		},
+	mustJSON, err := json.Marshal(must)
+	if err != nil {
+		return 0, fmt.Errorf("failed to marshal filters: %w", err)
 	}
 
+	// Build query
+	query := fmt.Sprintf(string(CountLogsTemplate), mustJSON)
+
 	var buf bytes.Buffer
-	// Encode query to buffer
-	if err := json.NewEncoder(&buf).Encode(query); err != nil {
-		return 0, fmt.Errorf("failed to encode query: %w", err)
-	}
+	buf.WriteString(query)
 
 	// Count request
 	res, err := c.ES.Count(

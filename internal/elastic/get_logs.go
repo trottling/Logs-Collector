@@ -19,20 +19,15 @@ func (c *Client) GetLogs(filters map[string]string, limit int) ([]map[string]int
 		})
 	}
 
-	// Build query
-	query := map[string]interface{}{
-		"query": map[string]interface{}{
-			"bool": map[string]interface{}{
-				"must": must,
-			},
-		},
+	mustJSON, err := json.Marshal(must)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal filters: %w", err)
 	}
+	// Create query
+	query := fmt.Sprintf(string(SearchLogsTemplate), mustJSON, limit)
 
 	var buf bytes.Buffer
-	// Encode query to buffer
-	if err := json.NewEncoder(&buf).Encode(query); err != nil {
-		return nil, fmt.Errorf("failed to encode query: %w", err)
-	}
+	buf.WriteString(query)
 
 	// Search request
 	res, err := c.ES.Search(
@@ -40,7 +35,6 @@ func (c *Client) GetLogs(filters map[string]string, limit int) ([]map[string]int
 		c.ES.Search.WithBody(&buf),
 		c.ES.Search.WithTrackTotalHits(true),
 		c.ES.Search.WithPretty(),
-		c.ES.Search.WithSize(limit),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("elasticsearch search failed: %w", err)
