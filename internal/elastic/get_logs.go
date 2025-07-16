@@ -6,9 +6,11 @@ import (
 	"fmt"
 )
 
+// GetLogs returns logs from elasticsearch by filters and limit
 func (c *Client) GetLogs(filters map[string]string, limit int) ([]map[string]interface{}, error) {
 	var must []map[string]interface{}
 
+	// Build must filters
 	for field, value := range filters {
 		must = append(must, map[string]interface{}{
 			"term": map[string]interface{}{
@@ -17,6 +19,7 @@ func (c *Client) GetLogs(filters map[string]string, limit int) ([]map[string]int
 		})
 	}
 
+	// Build query
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
 			"bool": map[string]interface{}{
@@ -26,10 +29,12 @@ func (c *Client) GetLogs(filters map[string]string, limit int) ([]map[string]int
 	}
 
 	var buf bytes.Buffer
+	// Encode query to buffer
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
 		return nil, fmt.Errorf("failed to encode query: %w", err)
 	}
 
+	// Search request
 	res, err := c.ES.Search(
 		c.ES.Search.WithIndex("logs"),
 		c.ES.Search.WithBody(&buf),
@@ -47,11 +52,13 @@ func (c *Client) GetLogs(filters map[string]string, limit int) ([]map[string]int
 	}
 
 	var r map[string]interface{}
+	// Decode response
 	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
 		return nil, fmt.Errorf("failed to decode search response: %w", err)
 	}
 
 	var hits []map[string]interface{}
+	// Extract hits
 	for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
 		hits = append(hits, hit.(map[string]interface{})["_source"].(map[string]interface{}))
 	}

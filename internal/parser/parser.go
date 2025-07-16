@@ -11,10 +11,12 @@ type LogParser struct {
 	log *zap.Logger
 }
 
+// New creates a new LogParser instance
 func New(log *zap.Logger) *LogParser {
 	return &LogParser{log: log}
 }
 
+// Parse parses a log entry according to logType
 func (parser *LogParser) Parse(log map[string]interface{}, logType string) (map[string]interface{}, error) {
 	var parseFunc func(map[string]interface{}) (map[string]interface{}, error)
 
@@ -31,6 +33,7 @@ func (parser *LogParser) Parse(log map[string]interface{}, logType string) (map[
 		return nil, errors.New("unknown parser type: " + logType)
 	}
 
+	// Parse log
 	parsed, err := parseFunc(log)
 	if err != nil {
 		return nil, err

@@ -10,16 +10,19 @@ import (
 	"go.uber.org/zap"
 )
 
+// handleGetLogs returns logs with filters and limit
 func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetLogsRequest
 
 	filters := make(map[string]string)
+	// Parse query params
 	for key, values := range r.URL.Query() {
 		if len(values) > 0 {
 			filters[key] = values[0]
 		}
 	}
 
+	// Parse limit param
 	limit := 0
 	if l, ok := filters["limit"]; ok {
 		fmt.Sscanf(l, "%d", &limit)
@@ -28,12 +31,14 @@ func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 
 	req.Filters = filters
 	req.Limit = limit
+	// Validate request
 	if err := validation.Validate.Struct(&req); err != nil {
 		h.log.Error("validation error", zap.Error(err))
 		h.respond(w, http.StatusBadRequest, "validation error")
 		return
 	}
 
+	// Get logs from elastic
 	logs, err := h.es.GetLogs(req.Filters, req.Limit)
 	if err != nil {
 		h.log.Error("failed to get logs", zap.Error(err))

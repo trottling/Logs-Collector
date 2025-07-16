@@ -10,21 +10,25 @@ import (
 	"go.uber.org/zap"
 )
 
+// handleAddLogs adds multiple log entries
 func (h *Handler) handleAddLogs(w http.ResponseWriter, r *http.Request) {
 	var req dto.AddLogsRequest
 
+	// Decode request body
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Error("failed to decode request", zap.Error(err))
 		h.respond(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
+	// Validate request
 	if err := validation.Validate.Struct(&req); err != nil {
 		h.log.Error("validation error", zap.Error(err))
 		h.respond(w, http.StatusBadRequest, "validation error")
 		return
 	}
 
+	// Parse each log
 	var normalizedLogs []map[string]interface{}
 	for _, log := range req.Logs {
 		if normalized, err := h.pr.Parse(log, req.ParseType); err != nil {
@@ -36,6 +40,7 @@ func (h *Handler) handleAddLogs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Index logs in elastic
 	if err := h.es.IndexLogs(normalizedLogs); err != nil {
 		h.log.Error("failed to index log", zap.Error(err))
 		h.respond(w, http.StatusInternalServerError, "failed to index log")

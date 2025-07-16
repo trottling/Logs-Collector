@@ -7,7 +7,9 @@ import (
 	"net/http"
 )
 
+// handleHealth returns health status of the service and system
 func (h *Handler) handleHealth(w http.ResponseWriter, _ *http.Request) {
+	// Check elastic health
 	res, err := h.es.ES.Info()
 	if err != nil {
 		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: fmt.Sprintf("Elastic health error: %s", err.Error())})
@@ -17,12 +19,14 @@ func (h *Handler) handleHealth(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
+	// Get system stats
 	sysHealth, err := health.GetSystemStats()
 	if err != nil {
 		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: err.Error(), ElasticStatus: "ok"})
 		return
 	}
 
+	// Build response
 	response := dto.HealthResponse{
 		Status:        "ok",
 		ElasticStatus: "ok",
