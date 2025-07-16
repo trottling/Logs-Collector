@@ -1,12 +1,18 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+
+	"log_stash_lite/internal/api/dto"
+	"log_stash_lite/internal/api/validation"
 
 	"go.uber.org/zap"
 )
 
 func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
+	var req dto.GetLogsRequest
+
 	filters := make(map[string]string)
 	for key, values := range r.URL.Query() {
 		if len(values) > 0 {
@@ -14,12 +20,26 @@ func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	logs, err := h.es.GetLogs(filters)
+	limit := 0
+	if l, ok := filters["limit"]; ok {
+		fmt.Sscanf(l, "%d", &limit)
+		delete(filters, "limit")
+	}
+
+	req.Filters = filters
+	req.Limit = limit
+	if err := validation.Validate.Struct(&req); err != nil {
+		h.log.Error("validation error", zap.Error(err))
+		h.respond(w, http.StatusBadRequest, "validation error")
+		return
+	}
+
+	logs, err := h.es.GetLogs(req.Filters, req.Limit)
 	if err != nil {
 		h.log.Error("failed to get logs", zap.Error(err))
 		h.respond(w, http.StatusInternalServerError, map[string]string{"error": "failed to fetch logs"})
 		return
 	}
 
-	h.respond(w, http.StatusOK, logs)
+	h.respond(w, http.StatusOK, dto.GetLogsResponse{Logs: logs, Count: len(logs)})
 }

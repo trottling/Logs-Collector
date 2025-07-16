@@ -10,8 +10,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var okResp = map[string]string{"status": "ok"}
-
 type Handler struct {
 	log *zap.Logger
 	pr  *parser.LogParser
