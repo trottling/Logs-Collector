@@ -29,8 +29,16 @@ func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 		delete(filters, "limit")
 	}
 
+	// Parse offset param
+	offset := 0
+	if o, ok := filters["offset"]; ok {
+		fmt.Sscanf(o, "%d", &offset)
+		delete(filters, "offset")
+	}
+
 	req.Filters = filters
 	req.Limit = limit
+	req.Offset = offset
 	// Validate request
 	if err := validation.Validate.Struct(&req); err != nil {
 		h.log.Error("validation error", zap.Error(err))
@@ -39,7 +47,7 @@ func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get logs from elastic
-	logs, err := h.es.GetLogs(req.Filters, req.Limit)
+	logs, err := h.es.GetLogs(req.Filters, req.Limit, req.Offset)
 	if err != nil {
 		h.log.Error("failed to get logs", zap.Error(err))
 		h.respond(w, http.StatusInternalServerError, map[string]string{"error": "failed to fetch logs"})

@@ -6,8 +6,8 @@ import (
 	"fmt"
 )
 
-// GetLogs returns logs from elasticsearch by filters and limit
-func (c *Client) GetLogs(filters map[string]string, limit int) ([]map[string]interface{}, error) {
+// GetLogs returns logs from elasticsearch by filters, limit and offset
+func (c *Client) GetLogs(filters map[string]string, limit int, offset int) ([]map[string]interface{}, error) {
 	var must []map[string]interface{}
 
 	// Build must filters
@@ -23,8 +23,9 @@ func (c *Client) GetLogs(filters map[string]string, limit int) ([]map[string]int
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal filters: %w", err)
 	}
-	// Create query
-	query := fmt.Sprintf(string(SearchLogsTemplate), mustJSON, limit)
+
+	// Create query with offset and limit
+	query := fmt.Sprintf(`{"query":{"bool":{"must":%s}},"size":%d,"from":%d}`, mustJSON, limit, offset)
 
 	var buf bytes.Buffer
 	buf.WriteString(query)
