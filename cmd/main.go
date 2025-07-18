@@ -18,7 +18,7 @@ func main() {
 	cfg := config.Load()
 	log := logger.New()
 	pr := parser.New(log)
-	es, err := elastic.NewClient(cfg.ElasticURL, log)
+	es, err := elastic.NewClient(cfg, log)
 	if err != nil {
 		log.Fatal("failed to create elastic client", zap.Error(err))
 	}

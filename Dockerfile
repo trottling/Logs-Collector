@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.4
 FROM golang:1.24 AS builder
 
 WORKDIR /app
@@ -7,15 +6,15 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o app ./cmd/server
 
-FROM debian:bookworm-slim
+RUN go build -o app .
 
-WORKDIR /app
-COPY --from=builder /app/app /app/app
+FROM alpine:latest
 
-ENV PORT=8080
+RUN apk --no-cache add ca-certificates
 
-EXPOSE 8080
+WORKDIR /root/
+
+COPY --from=builder /app/app .
 
 CMD ["./app"]
