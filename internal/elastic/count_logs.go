@@ -24,7 +24,7 @@ func (c *Client) CountLogs(filters map[string]string) (int, error) {
 		return 0, fmt.Errorf("failed to marshal filters: %w", err)
 	}
 
-	// Build query
+	// Build query through template
 	query := fmt.Sprintf(string(CountLogsTemplate), mustJSON)
 
 	var buf bytes.Buffer

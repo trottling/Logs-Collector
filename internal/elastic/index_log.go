@@ -3,6 +3,7 @@ package elastic
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 
 	"go.uber.org/zap"
 )
@@ -17,13 +18,15 @@ func (c *Client) IndexLog(entry map[string]interface{}) error {
 	entry["raw"] = string(rawData)
 
 	// Marshal entry with raw
-	data, err := json.Marshal(entry)
+	body, err := json.Marshal(entry)
 	if err != nil {
 		return err
 	}
 
-	// Send index request
-	res, err := c.ES.Index("logs", bytes.NewReader(data))
+	// Build query through template
+	query := fmt.Sprintf(string(IndexLogTemplate), string(body))
+
+	res, err := c.ES.API.Indices.Create("logs", c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))))
 	if err != nil {
 		return err
 	}

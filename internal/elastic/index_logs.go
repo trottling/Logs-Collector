@@ -3,12 +3,15 @@ package elastic
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"go.uber.org/zap"
 )
 
 // IndexLogs indexes multiple log entries in elasticsearch
 func (c *Client) IndexLogs(entries []map[string]interface{}) error {
+	var entriesData []string
 	for _, entry := range entries {
 		// Marshal log entry to JSON
 		rawData, err := json.Marshal(entry)
@@ -22,19 +25,21 @@ func (c *Client) IndexLogs(entries []map[string]interface{}) error {
 		if err != nil {
 			return err
 		}
+		entriesData = append(entriesData, string(data))
+	}
 
-		// Send index request
-		res, err := c.ES.Index("logs", bytes.NewReader(data))
-		if err != nil {
-			return err
-		}
+	// Build query through template
+	query := fmt.Sprintf(string(IndexLogsTemplate), strings.Join(entriesData, ",\n"))
 
-		defer res.Body.Close()
+	res, err := c.ES.API.Indices.Create("logs", c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))))
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
 
-		if res.IsError() {
-			c.Log.Error("failed to index log", zap.String("status", res.Status()))
-			return err
-		}
+	if res.IsError() {
+		c.Log.Error("failed to index log", zap.String("status", res.Status()))
+		return err
 	}
 
 	c.Log.Info("logs indexed")

@@ -24,8 +24,12 @@ func (c *Client) GetLogs(filters map[string]string, limit int, offset int) ([]ma
 		return nil, fmt.Errorf("failed to marshal filters: %w", err)
 	}
 
-	// Create query with offset and limit
-	query := fmt.Sprintf(`{"query":{"bool":{"must":%s}},"size":%d,"from":%d}`, mustJSON, limit, offset)
+	// Build query
+	query := fmt.Sprintf(string(SearchLogsTemplate), mustJSON, limit)
+	if offset > 0 {
+		// Add offset manually, since the template does not contain from
+		query = query[:len(query)-2] + fmt.Sprintf(",\n  \"from\": %d\n}", offset)
+	}
 
 	var buf bytes.Buffer
 	buf.WriteString(query)
