@@ -1,10 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log_stash_lite/internal/api/handlers"
 	"log_stash_lite/internal/parser"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
@@ -27,8 +31,29 @@ func main() {
 	h := handlers.NewHandler(log, es, pr)
 	h.RegisterRoutes(r)
 
-	log.Info("starting server", zap.String("addr", cfg.ListenAddr))
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", cfg.ListenAddr), r); err != nil {
-		log.Fatal("server error", zap.Error(err))
+	server := &http.Server{
+		Addr:    cfg.ListenAddr,
+		Handler: r,
 	}
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		log.Info("starting server", zap.String("addr", cfg.ListenAddr))
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal("server error", zap.Error(err))
+		}
+	}()
+
+	<-quit
+	log.Info("shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatal("server forced to shutdown", zap.Error(err))
+	}
+
+	log.Info("server exited gracefully")
 }

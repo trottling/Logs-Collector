@@ -1,4 +1,4 @@
-APP_NAME := app
+APP_NAME := log_stash_lite
 DOCKER_IMAGE := $(APP_NAME):latest
 DOCKER_COMPOSE := docker compose
 GO_BUILD := go build -o $(APP_NAME)
@@ -9,7 +9,7 @@ all: build
 
 build:
 	@echo "🚧 Building Go binary..."
-	$(GO_BUILD) .
+	$(GO_BUILD) ./cmd/main.go
 
 docker-build:
 	@echo "📦 Building Docker image..."

@@ -13,7 +13,7 @@ type Config struct {
 // Load loads config from environment variables
 func Load() Config {
 	return Config{
-		ListenAddr:      getEnv("LISTEN_ADDR", "8080"),
+		ListenAddr:      getEnv("LISTEN_ADDR", ":8080"),
 		ElasticURL:      getEnv("ELASTIC_URL", "http://localhost:9200"),
 		ElasticUsername: getEnv("ELASTIC_PASSWORD", "change_me"),
 		ElasticPassword: getEnv("ELASTIC_PASSWORD", "http://localhost:9200"),
