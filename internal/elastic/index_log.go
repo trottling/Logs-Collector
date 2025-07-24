@@ -23,10 +23,7 @@ func (c *Client) IndexLog(entry map[string]interface{}) error {
 		return err
 	}
 
-	// Build query through template
-	query := fmt.Sprintf(string(IndexLogTemplate), string(body))
-
-	res, err := c.ES.API.Indices.Create("logs", c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))))
+	res, err := c.ES.Index("logs", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -34,7 +31,7 @@ func (c *Client) IndexLog(entry map[string]interface{}) error {
 
 	if res.IsError() {
 		c.Log.Error("failed to index log", zap.String("status", res.Status()))
-		return err
+		return fmt.Errorf("index error: %s", res.Status())
 	}
 
 	c.Log.Info("log indexed")
