@@ -2,6 +2,7 @@ package elastic
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"testing"
@@ -14,7 +15,7 @@ func TestIndexLog(t *testing.T) {
 		w.WriteHeader(200)
 	})
 	entry := map[string]interface{}{"msg": "hello"}
-	if err := client.IndexLog(entry); err != nil {
+	if err := client.IndexLog(context.Background(), entry); err != nil {
 		t.Fatalf("IndexLog error: %v", err)
 	}
 	if entry["raw"] == nil {

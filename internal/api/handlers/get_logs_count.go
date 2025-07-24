@@ -30,7 +30,7 @@ func (h *Handler) handleGetLogsCount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get count from elastic
-	count, err := h.es.CountLogs(req.Filters)
+	count, err := h.es.CountLogs(r.Context(), req.Filters)
 	if err != nil {
 		h.log.Error("failed to get logs", zap.Error(err))
 		h.respond(w, http.StatusInternalServerError, map[string]string{"error": "failed to fetch logs"})
