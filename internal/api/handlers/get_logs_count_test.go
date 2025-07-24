@@ -1,41 +1,53 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
-
-	"log_stash_lite/internal/api/dto"
-	"log_stash_lite/internal/api/validation"
-
-	"go.uber.org/zap"
+	"net/http/httptest"
+	"testing"
 )
 
-// handleGetLogsCount returns only count of logs by filters
-func (h *Handler) handleGetLogsCount(w http.ResponseWriter, r *http.Request) {
-	var req dto.GetLogsCountRequest
+func TestHandleGetLogsCount(t *testing.T) {
+	called := false
+	es := newElastic(t, func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		fmt.Fprint(w, `{"count":3}`)
+	})
+	h := newHandler(t, es)
 
-	filters := make(map[string]string)
-	// Parse query params
-	for key, values := range r.URL.Query() {
-		if len(values) > 0 {
-			filters[key] = values[0]
-		}
+	r := httptest.NewRequest(http.MethodGet, "/get_logs_count?level=info", nil)
+	w := httptest.NewRecorder()
+
+	h.handleGetLogsCount(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status %d", w.Code)
 	}
-
-	req.Filters = filters
-	// Validate request
-	if err := validation.Validate.Struct(&req); err != nil {
-		h.log.Error("validation error", zap.Error(err))
-		h.respond(w, http.StatusBadRequest, "validation error")
-		return
+	if !called {
+		t.Errorf("es not called")
 	}
-
-	// Get count from elastic
-	count, err := h.es.CountLogs(req.Filters)
-	if err != nil {
-		h.log.Error("failed to get logs", zap.Error(err))
-		h.respond(w, http.StatusInternalServerError, map[string]string{"error": "failed to fetch logs"})
-		return
+	var resp map[string]int
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("decode response: %v", err)
 	}
+	if resp["count"] != 3 {
+		t.Errorf("count %d", resp["count"])
+	}
+}
 
-	h.respond(w, http.StatusOK, dto.GetLogsCountResponse{Count: count})
+func TestHandleGetLogsCount_ElasticError(t *testing.T) {
+	es := newElastic(t, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+	h := newHandler(t, es)
+
+	r := httptest.NewRequest(http.MethodGet, "/get_logs_count?level=debug", nil)
+	w := httptest.NewRecorder()
+
+	h.handleGetLogsCount(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("status %d", w.Code)
+	}
 }
