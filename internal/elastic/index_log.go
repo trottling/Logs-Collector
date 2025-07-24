@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"go.uber.org/zap"
 )
@@ -33,10 +34,11 @@ func (c *Client) IndexLog(entry map[string]interface{}) error {
 	defer res.Body.Close()
 
 	if res.IsError() {
-		c.Log.Error("failed to index log", zap.String("status", res.Status()))
-		return err
+		body, _ := io.ReadAll(res.Body)
+		c.Log.Error("failed to index log", zap.String("status", res.Status()), zap.ByteString("response", body))
+		return fmt.Errorf("elasticsearch error: %s", res.Status())
 	}
 
-	c.Log.Info("log indexed")
+	c.Log.Debug("log indexed")
 	return nil
 }

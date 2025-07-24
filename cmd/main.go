@@ -20,7 +20,7 @@ import (
 
 func main() {
 	cfg := config.Load()
-	log := logger.New()
+	log := logger.New(cfg.LogLevel)
 	pr := parser.New(log)
 	es, err := elastic.NewClient(cfg, log)
 	if err != nil {

@@ -4,7 +4,12 @@ import (
 	"go.uber.org/zap"
 )
 
-func New() *zap.Logger {
-	logger, _ := zap.NewProduction()
+// New creates a logger with the provided level string. Defaults to info on invalid values.
+func New(level string) *zap.Logger {
+	cfg := zap.NewProductionConfig()
+	if err := cfg.Level.UnmarshalText([]byte(level)); err != nil {
+		cfg.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	}
+	logger, _ := cfg.Build()
 	return logger
 }
