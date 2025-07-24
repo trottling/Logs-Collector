@@ -47,7 +47,7 @@ func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get logs from elastic
-	logs, err := h.es.GetLogs(req.Filters, req.Limit, req.Offset)
+	logs, err := h.es.GetLogs(r.Context(), req.Filters, req.Limit, req.Offset)
 	if err != nil {
 		h.log.Error("failed to get logs", zap.Error(err))
 		h.respond(w, http.StatusInternalServerError, map[string]string{"error": "failed to fetch logs"})

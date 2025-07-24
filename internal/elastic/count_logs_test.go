@@ -2,6 +2,7 @@ package elastic
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,7 +17,7 @@ func TestCountLogs(t *testing.T) {
 		fmt.Fprint(w, `{"count":3}`)
 	})
 
-	count, err := client.CountLogs(map[string]string{"level": "info"})
+	count, err := client.CountLogs(context.Background(), map[string]string{"level": "info"})
 	if err != nil {
 		t.Fatalf("CountLogs error: %v", err)
 	}

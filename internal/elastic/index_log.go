@@ -2,14 +2,16 @@ package elastic
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 
+	"github.com/elastic/go-elasticsearch/v9/esapi"
 	"go.uber.org/zap"
 )
 
 // IndexLog indexes a single log entry in elasticsearch
-func (c *Client) IndexLog(entry map[string]interface{}) error {
+func (c *Client) IndexLog(ctx context.Context, entry map[string]interface{}) error {
 	// Marshal log entry to JSON
 	rawData, err := json.Marshal(entry)
 	if err != nil {
@@ -26,7 +28,13 @@ func (c *Client) IndexLog(entry map[string]interface{}) error {
 	// Build query through template
 	query := fmt.Sprintf(string(IndexLogTemplate), string(body))
 
-	res, err := c.ES.API.Indices.Create("logs", c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))))
+	res, err := withRetry(ctx, func() (*esapi.Response, error) {
+		return c.ES.API.Indices.Create(
+			"logs",
+			c.ES.API.Indices.Create.WithContext(ctx),
+			c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))),
+		)
+	})
 	if err != nil {
 		return err
 	}
@@ -34,7 +42,7 @@ func (c *Client) IndexLog(entry map[string]interface{}) error {
 
 	if res.IsError() {
 		c.Log.Error("failed to index log", zap.String("status", res.Status()))
-		return err
+		return fmt.Errorf("elasticsearch error: %s", res.Status())
 	}
 
 	c.Log.Info("log indexed")
