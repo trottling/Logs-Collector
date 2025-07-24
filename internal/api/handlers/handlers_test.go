@@ -7,6 +7,7 @@ import (
 
 	"log_stash_lite/internal/elastic"
 	"log_stash_lite/internal/parser"
+	"log_stash_lite/internal/storage"
 
 	"github.com/elastic/go-elasticsearch/v9"
 	"go.uber.org/zap"
@@ -28,6 +29,6 @@ func newElastic(t *testing.T, handler http.HandlerFunc) *elastic.Client {
 	return &elastic.Client{ES: es, Log: zap.NewNop()}
 }
 
-func newHandler(t *testing.T, es *elastic.Client) *Handler {
+func newHandler(t *testing.T, es storage.Storage) *Handler {
 	return NewHandler(zap.NewNop(), es, parser.New(zap.NewNop()))
 }
