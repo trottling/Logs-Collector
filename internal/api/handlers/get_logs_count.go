@@ -25,7 +25,7 @@ func (h *Handler) handleGetLogsCount(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	if err := validation.Validate.Struct(&req); err != nil {
 		h.log.Error("validation error", zap.Error(err))
-		h.respond(w, http.StatusBadRequest, "validation error")
+		h.respond(w, http.StatusBadRequest, dto.ErrorResponse{Error: "validation error"})
 		return
 	}
 
@@ -33,7 +33,7 @@ func (h *Handler) handleGetLogsCount(w http.ResponseWriter, r *http.Request) {
 	count, err := h.es.CountLogs(req.Filters)
 	if err != nil {
 		h.log.Error("failed to get logs", zap.Error(err))
-		h.respond(w, http.StatusInternalServerError, map[string]string{"error": "failed to fetch logs"})
+		h.respond(w, http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to fetch logs"})
 		return
 	}
 

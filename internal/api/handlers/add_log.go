@@ -17,14 +17,14 @@ func (h *Handler) handleAddLog(w http.ResponseWriter, r *http.Request) {
 	// Decode request body
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Error("failed to decode request", zap.Error(err))
-		h.respond(w, http.StatusBadRequest, "invalid request body")
+		h.respond(w, http.StatusBadRequest, dto.ErrorResponse{Error: "invalid request body"})
 		return
 	}
 
 	// Validate request
 	if err := validation.Validate.Struct(&req); err != nil {
 		h.log.Error("validation error", zap.Error(err))
-		h.respond(w, http.StatusBadRequest, "validation error")
+		h.respond(w, http.StatusBadRequest, dto.ErrorResponse{Error: "validation error"})
 		return
 	}
 
@@ -32,14 +32,14 @@ func (h *Handler) handleAddLog(w http.ResponseWriter, r *http.Request) {
 	normalized, err := h.pr.Parse(req.Log, req.ParseType)
 	if err != nil {
 		h.log.Error("failed to parse request", zap.Error(err))
-		h.respond(w, http.StatusBadRequest, "failed to parse log")
+		h.respond(w, http.StatusBadRequest, dto.ErrorResponse{Error: "failed to parse log"})
 		return
 	}
 
 	// Index log in elastic
 	if err := h.es.IndexLog(normalized); err != nil {
 		h.log.Error("failed to index log", zap.Error(err))
-		h.respond(w, http.StatusInternalServerError, "failed to index log")
+		h.respond(w, http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to index log"})
 		return
 	}
 
