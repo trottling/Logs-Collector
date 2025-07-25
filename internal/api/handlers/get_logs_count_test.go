@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,8 +12,10 @@ import (
 
 func TestHandleGetLogsCount(t *testing.T) {
 	called := false
+	var body []byte
 	es := newElastic(t, func(w http.ResponseWriter, r *http.Request) {
 		called = true
+		body, _ = io.ReadAll(r.Body)
 		fmt.Fprint(w, `{"count":3}`)
 	})
 	h := newHandler(t, es)
@@ -33,6 +37,9 @@ func TestHandleGetLogsCount(t *testing.T) {
 	}
 	if resp["count"] != 3 {
 		t.Errorf("count %d", resp["count"])
+	}
+	if !bytes.Contains(body, []byte("level")) {
+		t.Errorf("elastic not called with filters")
 	}
 }
 

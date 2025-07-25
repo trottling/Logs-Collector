@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,8 +12,10 @@ import (
 
 func TestHandleGetLogs(t *testing.T) {
 	called := false
+	var body []byte
 	es := newElastic(t, func(w http.ResponseWriter, r *http.Request) {
 		called = true
+		body, _ = io.ReadAll(r.Body)
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, `{"hits":{"hits":[{"_source":{"msg":"hello"}}]}}`)
 	})
@@ -40,6 +44,9 @@ func TestHandleGetLogs(t *testing.T) {
 	}
 	if len(resp.Logs) == 0 || resp.Logs[0]["msg"] != "hello" {
 		t.Errorf("unexpected logs %+v", resp.Logs)
+	}
+	if !bytes.Contains(body, []byte("level")) {
+		t.Errorf("elastic not called with filters")
 	}
 }
 
