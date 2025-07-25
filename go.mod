@@ -1,4 +1,4 @@
-module log_stash_lite
+module logs-collector
 
 go 1.24.4
 

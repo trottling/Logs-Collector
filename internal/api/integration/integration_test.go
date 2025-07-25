@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"log_stash_lite/internal/api/dto"
-	"log_stash_lite/internal/api/handlers"
-	"log_stash_lite/internal/config"
-	"log_stash_lite/internal/elastic"
-	"log_stash_lite/internal/parser"
-	"log_stash_lite/internal/storage"
+	"logs-collector/internal/api/dto"
+	"logs-collector/internal/api/handlers"
+	"logs-collector/internal/config"
+	"logs-collector/internal/elastic"
+	"logs-collector/internal/parser"
+	"logs-collector/internal/storage"
 )
 
 func TestAddLog_Integration(t *testing.T) {

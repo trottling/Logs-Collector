@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"log_stash_lite/internal/api/dto"
+	"logs-collector/internal/api/dto"
 
 	"github.com/golang-jwt/jwt/v5"
 )

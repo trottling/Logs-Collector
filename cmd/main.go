@@ -3,19 +3,19 @@ package main
 import (
 	"context"
 	"errors"
-	"log_stash_lite/internal/api/handlers"
-	"log_stash_lite/internal/parser"
-	"log_stash_lite/internal/storage"
+	"logs-collector/internal/api/handlers"
+	"logs-collector/internal/parser"
+	"logs-collector/internal/storage"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	_ "log_stash_lite/docs"
-	"log_stash_lite/internal/config"
-	"log_stash_lite/internal/elastic"
-	"log_stash_lite/internal/logger"
+	_ "logs-collector/docs"
+	"logs-collector/internal/config"
+	"logs-collector/internal/elastic"
+	"logs-collector/internal/logger"
 
 	"go.uber.org/zap"
 )

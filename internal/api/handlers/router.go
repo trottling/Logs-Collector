@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"log_stash_lite/internal/api/middleware"
+	"logs-collector/internal/api/middleware"
 
 	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"

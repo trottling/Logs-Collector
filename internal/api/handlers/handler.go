@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"log_stash_lite/internal/config"
+	"logs-collector/internal/config"
 	"net/http"
 
-	"log_stash_lite/internal/parser"
-	"log_stash_lite/internal/storage"
+	"logs-collector/internal/parser"
+	"logs-collector/internal/storage"
 
 	"go.uber.org/zap"
 )

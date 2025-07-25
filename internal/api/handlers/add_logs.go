@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"log_stash_lite/internal/api/dto"
-	"log_stash_lite/internal/api/validation"
+	"logs-collector/internal/api/dto"
+	"logs-collector/internal/api/validation"
 
 	"go.uber.org/zap"
 )

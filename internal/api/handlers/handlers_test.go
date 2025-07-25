@@ -5,10 +5,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"log_stash_lite/internal/config"
-	"log_stash_lite/internal/elastic"
-	"log_stash_lite/internal/parser"
-	"log_stash_lite/internal/storage"
+	"logs-collector/internal/config"
+	"logs-collector/internal/elastic"
+	"logs-collector/internal/parser"
+	"logs-collector/internal/storage"
 
 	"github.com/elastic/go-elasticsearch/v9"
 	"go.uber.org/zap"

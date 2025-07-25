@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"log_stash_lite/internal/api/dto"
-	"log_stash_lite/internal/health"
+	"logs-collector/internal/api/dto"
+	"logs-collector/internal/health"
 )
 
 // HandleHealth
