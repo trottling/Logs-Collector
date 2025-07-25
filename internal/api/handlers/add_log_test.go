@@ -34,3 +34,24 @@ func TestHandleAddLog(t *testing.T) {
 		t.Errorf("es not called")
 	}
 }
+
+func TestHandleAddLog_ElasticError(t *testing.T) {
+	es := newElastic(t, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	h := newHandler(t, es)
+	reqBody := map[string]interface{}{
+		"parse_type": "default",
+		"log":        map[string]interface{}{"foo": "bar"},
+	}
+	b, _ := json.Marshal(reqBody)
+	r := httptest.NewRequest(http.MethodPost, "/add_log", bytes.NewReader(b))
+	w := httptest.NewRecorder()
+
+	h.handleAddLog(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("status %d", w.Code)
+	}
+}

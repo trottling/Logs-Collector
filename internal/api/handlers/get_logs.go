@@ -51,7 +51,7 @@ func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 	logs, err := h.es.GetLogs(r.Context(), req.Filters, req.Limit, req.Offset)
 	if err != nil {
 		h.log.Error("failed to get logs", zap.Error(err))
-		h.respond(w, http.StatusBadRequest, dto.ErrorResponse{Error: "failed to fetch logs"})
+		h.respond(w, http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to fetch logs"})
 		return
 	}
 

@@ -34,7 +34,7 @@ func (h *Handler) handleGetLogsCount(w http.ResponseWriter, r *http.Request) {
 	count, err := h.es.CountLogs(r.Context(), req.Filters)
 	if err != nil {
 		h.log.Error("failed to get logs", zap.Error(err))
-		h.respond(w, http.StatusBadRequest, dto.ErrorResponse{Error: "failed to fetch logs"})
+		h.respond(w, http.StatusInternalServerError, dto.ErrorResponse{Error: "failed to fetch logs"})
 		return
 	}
 
