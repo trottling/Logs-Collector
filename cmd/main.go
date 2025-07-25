@@ -12,12 +12,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"go.uber.org/zap"
-
+	_ "log_stash_lite/docs"
 	"log_stash_lite/internal/config"
 	"log_stash_lite/internal/elastic"
 	"log_stash_lite/internal/logger"
+
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
 func main() {

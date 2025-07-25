@@ -10,7 +10,18 @@ import (
 	"go.uber.org/zap"
 )
 
-// handleGetLogs returns logs with filters and limit
+// @Summary Get logs
+// @Description Returns logs with filters and limit
+// @Tags logs
+// @Accept json
+// @Produce json
+// @Param level query string false "Log level"
+// @Param limit query int false "Limit"
+// @Param offset query int false "Offset"
+// @Success 200 {object} dto.GetLogsResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /get_logs [get]
 func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetLogsRequest
 

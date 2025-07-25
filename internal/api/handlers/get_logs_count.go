@@ -9,7 +9,16 @@ import (
 	"go.uber.org/zap"
 )
 
-// handleGetLogsCount returns only count of logs by filters
+// @Summary Get logs count
+// @Description Returns only count of logs by filters
+// @Tags logs
+// @Accept json
+// @Produce json
+// @Param level query string false "Log level"
+// @Success 200 {object} dto.GetLogsCountResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /get_logs_count [get]
 func (h *Handler) handleGetLogsCount(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetLogsCountRequest
 
