@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/elastic/go-elasticsearch/v9/esapi"
 	"go.uber.org/zap"
 )
 
@@ -27,11 +28,13 @@ func (c *Client) IndexLog(ctx context.Context, entry map[string]interface{}) err
 	// Build query through template
 	query := fmt.Sprintf(string(IndexLogTemplate), string(body))
 
-	res, err := c.ES.API.Indices.Create("logs",
-		c.ES.API.Indices.Create.WithContext(ctx),
-		c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))),
-	)
-
+	res, err := withRetry(ctx, func() (*esapi.Response, error) {
+		return c.ES.API.Indices.Create(
+			"logs",
+			c.ES.API.Indices.Create.WithContext(ctx),
+			c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))),
+		)
+	})
 	if err != nil {
 		return err
 	}

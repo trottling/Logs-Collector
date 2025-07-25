@@ -5,13 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/elastic/go-elasticsearch/v9/esapi"
 )
 
 // CountLogs returns count of logs by filters
 func (c *Client) CountLogs(ctx context.Context, filters map[string]string) (int, error) {
 	var must []map[string]interface{}
 
-	// Build must filters
+	// Build must filter
 	for field, value := range filters {
 		must = append(must, map[string]interface{}{
 			"term": map[string]interface{}{
@@ -31,12 +33,14 @@ func (c *Client) CountLogs(ctx context.Context, filters map[string]string) (int,
 	var buf bytes.Buffer
 	buf.WriteString(query)
 
-	// Count request
-	res, err := c.ES.Count(
-		c.ES.Count.WithIndex("logs"),
-		c.ES.Count.WithBody(&buf),
-		c.ES.Count.WithContext(ctx),
-	)
+	// Count request with retry
+	res, err := withRetry(ctx, func() (*esapi.Response, error) {
+		return c.ES.Count(
+			c.ES.Count.WithContext(ctx),
+			c.ES.Count.WithIndex("logs"),
+			c.ES.Count.WithBody(&buf),
+		)
+	})
 	if err != nil {
 		return 0, fmt.Errorf("elasticsearch count failed: %w", err)
 	}

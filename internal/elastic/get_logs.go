@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/elastic/go-elasticsearch/v9/esapi"
 )
 
 // GetLogs returns logs from elasticsearch by filters, limit and offset
@@ -35,14 +37,16 @@ func (c *Client) GetLogs(ctx context.Context, filters map[string]string, limit i
 	var buf bytes.Buffer
 	buf.WriteString(query)
 
-	// Search request
-	res, err := c.ES.Search(
-		c.ES.Search.WithIndex("logs"),
-		c.ES.Search.WithBody(&buf),
-		c.ES.Search.WithTrackTotalHits(true),
-		c.ES.Search.WithPretty(),
-		c.ES.Search.WithContext(ctx),
-	)
+	// Search request with retry
+	res, err := withRetry(ctx, func() (*esapi.Response, error) {
+		return c.ES.Search(
+			c.ES.Search.WithContext(ctx),
+			c.ES.Search.WithIndex("logs"),
+			c.ES.Search.WithBody(&buf),
+			c.ES.Search.WithTrackTotalHits(true),
+			c.ES.Search.WithPretty(),
+		)
+	})
 	if err != nil {
 		return nil, fmt.Errorf("elasticsearch search failed: %w", err)
 	}

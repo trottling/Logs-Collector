@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/elastic/go-elasticsearch/v9/esapi"
 	"go.uber.org/zap"
 )
 
@@ -32,10 +33,13 @@ func (c *Client) IndexLogs(ctx context.Context, entries []map[string]interface{}
 	// Build query through template
 	query := fmt.Sprintf(string(IndexLogsTemplate), strings.Join(entriesData, ",\n"))
 
-	res, err := c.ES.API.Indices.Create("logs",
-		c.ES.API.Indices.Create.WithContext(ctx),
-		c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))),
-	)
+	res, err := withRetry(ctx, func() (*esapi.Response, error) {
+		return c.ES.API.Indices.Create(
+			"logs",
+			c.ES.API.Indices.Create.WithContext(ctx),
+			c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))),
+		)
+	})
 	if err != nil {
 		return err
 	}
@@ -43,7 +47,7 @@ func (c *Client) IndexLogs(ctx context.Context, entries []map[string]interface{}
 
 	if res.IsError() {
 		c.Log.Error("failed to index log", zap.String("status", res.Status()))
-		return err
+		return fmt.Errorf("elasticsearch error: %s", res.Status())
 	}
 
 	c.Log.Info("logs indexed")
