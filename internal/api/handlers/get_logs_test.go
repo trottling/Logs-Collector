@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestHandleGetLogsCount(t *testing.T) {
+func TestHandleLogStats(t *testing.T) {
 	es := newElastic(t, func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `{"count":4}`)
 	})
