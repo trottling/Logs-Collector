@@ -21,8 +21,8 @@ import (
 // @Produce json
 // @Param data query dto.AuthTokenRequest false "Auth params"
 // @Success 200 {object} dto.AuthTokenResponse
-// @Failure 400 string dto.ErrorResponse
-// @Failure 500 string dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
 // @Router /auth/token [get]
 func (h *Handler) HandleAuthToken(w http.ResponseWriter, r *http.Request) {
 	var req dto.AuthTokenRequest

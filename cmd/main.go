@@ -40,8 +40,11 @@ func main() {
 	r := handlers.NewRouter(h, []byte(jwtSecret))
 
 	server := &http.Server{
-		Addr:    cfg.ListenAddr,
-		Handler: r,
+		Addr:         cfg.ListenAddr,
+		Handler:      r,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
 	quit := make(chan os.Signal, 1)
