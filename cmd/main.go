@@ -4,6 +4,7 @@ import (
 	"context"
 	"log_stash_lite/internal/api/handlers"
 	"log_stash_lite/internal/parser"
+	"log_stash_lite/internal/storage"
 	"net/http"
 	"os"
 	"os/signal"
@@ -28,7 +29,8 @@ func main() {
 	}
 
 	r := chi.NewRouter()
-	h := handlers.NewHandler(log, es, pr)
+	var store storage.Storage = es
+	h := handlers.NewHandler(log, store, pr)
 	h.RegisterRoutes(r)
 
 	server := &http.Server{

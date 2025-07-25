@@ -3,6 +3,7 @@ package elastic
 import (
 	_ "embed"
 	"log_stash_lite/internal/config"
+	"log_stash_lite/internal/storage"
 
 	"github.com/elastic/go-elasticsearch/v9"
 	"go.uber.org/zap"
@@ -27,6 +28,9 @@ type Client struct {
 	ES  *elasticsearch.Client
 	Log *zap.Logger
 }
+
+// Ensure Client implements the storage.Storage interface.
+var _ storage.Storage = (*Client)(nil)
 
 func NewClient(cfg config.Config, log *zap.Logger) (*Client, error) {
 	es, err := elasticsearch.NewClient(elasticsearch.Config{

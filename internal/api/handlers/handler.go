@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"log_stash_lite/internal/elastic"
 	"log_stash_lite/internal/parser"
+	"log_stash_lite/internal/storage"
 
 	"go.uber.org/zap"
 )
@@ -14,11 +14,11 @@ import (
 type Handler struct {
 	log *zap.Logger
 	pr  *parser.LogParser
-	es  *elastic.Client
+	es  storage.Storage
 }
 
 // NewHandler creates a new Handler instance
-func NewHandler(log *zap.Logger, es *elastic.Client, pr *parser.LogParser) *Handler {
+func NewHandler(log *zap.Logger, es storage.Storage, pr *parser.LogParser) *Handler {
 	return &Handler{log: log, es: es, pr: pr}
 }
 
