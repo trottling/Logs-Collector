@@ -13,7 +13,7 @@ import (
 func (c *Client) GetLogs(ctx context.Context, filters map[string]string, limit int, offset int) ([]map[string]interface{}, error) {
 	var must []map[string]interface{}
 
-	// Build must filters
+	// Build must filter
 	for field, value := range filters {
 		must = append(must, map[string]interface{}{
 			"term": map[string]interface{}{

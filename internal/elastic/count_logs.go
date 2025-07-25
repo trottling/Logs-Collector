@@ -44,6 +44,7 @@ func (c *Client) CountLogs(ctx context.Context, filters map[string]string) (int,
 	if err != nil {
 		return 0, fmt.Errorf("elasticsearch count failed: %w", err)
 	}
+
 	defer res.Body.Close()
 
 	if res.IsError() {

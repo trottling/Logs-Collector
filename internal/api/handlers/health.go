@@ -11,12 +11,14 @@ import (
 
 // handleHealth returns health status of the service and system
 func (h *Handler) handleHealth(w http.ResponseWriter, _ *http.Request) {
+
 	// Check elastic health if underlying storage is elastic
 	esClient, ok := h.es.(*elastic.Client)
 	if !ok {
 		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: "elastic client unavailable"})
 		return
 	}
+
 	res, err := esClient.ES.Info()
 	if err != nil {
 		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: fmt.Sprintf("Elastic health error: %s", err.Error())})

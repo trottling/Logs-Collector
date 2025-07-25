@@ -22,6 +22,7 @@ func (h *Handler) handleGetLogsCount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req.Filters = filters
+
 	// Validate request
 	if err := validation.Validate.Struct(&req); err != nil {
 		h.log.Error("validation error", zap.Error(err))

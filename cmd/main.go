@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log_stash_lite/internal/api/handlers"
 	"log_stash_lite/internal/parser"
 	"log_stash_lite/internal/storage"
@@ -43,7 +44,7 @@ func main() {
 
 	go func() {
 		log.Info("starting server", zap.String("addr", cfg.ListenAddr))
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatal("server error", zap.Error(err))
 		}
 	}()

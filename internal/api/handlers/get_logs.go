@@ -39,6 +39,7 @@ func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 	req.Filters = filters
 	req.Limit = limit
 	req.Offset = offset
+
 	// Validate request
 	if err := validation.Validate.Struct(&req); err != nil {
 		h.log.Error("validation error", zap.Error(err))
