@@ -2,6 +2,7 @@ package elastic
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -9,7 +10,7 @@ import (
 )
 
 // IndexLog indexes a single log entry in elasticsearch
-func (c *Client) IndexLog(entry map[string]interface{}) error {
+func (c *Client) IndexLog(ctx context.Context, entry map[string]interface{}) error {
 	// Marshal log entry to JSON
 	rawData, err := json.Marshal(entry)
 	if err != nil {
@@ -23,7 +24,14 @@ func (c *Client) IndexLog(entry map[string]interface{}) error {
 		return err
 	}
 
-	res, err := c.ES.Index("logs", bytes.NewReader(body))
+	// Build query through template
+	query := fmt.Sprintf(string(IndexLogTemplate), string(body))
+
+	res, err := c.ES.API.Indices.Create("logs",
+		c.ES.API.Indices.Create.WithContext(ctx),
+		c.ES.API.Indices.Create.WithBody(bytes.NewReader([]byte(query))),
+	)
+
 	if err != nil {
 		return err
 	}

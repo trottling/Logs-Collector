@@ -37,7 +37,7 @@ func (h *Handler) handleAddLog(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Index log in elastic
-	if err := h.es.IndexLog(normalized); err != nil {
+	if err := h.es.IndexLog(r.Context(), normalized); err != nil {
 		h.log.Error("failed to index log", zap.Error(err))
 		h.respond(w, http.StatusInternalServerError, "failed to index log")
 		return

@@ -2,6 +2,7 @@ package elastic
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,7 +17,7 @@ func TestGetLogs(t *testing.T) {
 		fmt.Fprint(w, `{"hits":{"hits":[{"_source":{"msg":"a"}}]}}`)
 	})
 
-	logs, err := client.GetLogs(map[string]string{"foo": "bar"}, 1, 0)
+	logs, err := client.GetLogs(context.Background(), map[string]string{"foo": "bar"}, 1, 0)
 	if err != nil {
 		t.Fatalf("GetLogs error: %v", err)
 	}

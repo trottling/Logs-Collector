@@ -1,6 +1,7 @@
 package elastic
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"testing"
@@ -13,7 +14,7 @@ func TestIndexLogs(t *testing.T) {
 		w.WriteHeader(200)
 	})
 	logs := []map[string]interface{}{{"a": 1}, {"b": 2}}
-	if err := client.IndexLogs(logs); err != nil {
+	if err := client.IndexLogs(context.Background(), logs); err != nil {
 		t.Fatalf("IndexLogs error: %v", err)
 	}
 	if logs[0]["raw"] == nil || logs[1]["raw"] == nil {
