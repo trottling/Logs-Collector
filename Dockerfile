@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-ENV JWT_SECRET=changeme
+ENV JWT_SECRET=change_me
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app ./cmd/main.go
 
