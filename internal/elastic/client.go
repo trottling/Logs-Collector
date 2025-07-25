@@ -1,7 +1,9 @@
 package elastic
 
 import (
+	"context"
 	_ "embed"
+	"fmt"
 	"log_stash_lite/internal/config"
 	"log_stash_lite/internal/storage"
 
@@ -42,4 +44,16 @@ func NewClient(cfg config.Config, log *zap.Logger) (*Client, error) {
 		return nil, err
 	}
 	return &Client{ES: es, Log: log}, nil
+}
+
+func (c *Client) HealthCheck(ctx context.Context) (*storage.HealthStatus, error) {
+	res, err := c.ES.Info()
+	if err != nil {
+		return &storage.HealthStatus{ElasticStatus: "bad", Error: err.Error()}, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return &storage.HealthStatus{ElasticStatus: "bad", Error: fmt.Sprintf("Bad status: %d", res.StatusCode)}, fmt.Errorf("bad status: %d", res.StatusCode)
+	}
+	return &storage.HealthStatus{ElasticStatus: "ok"}, nil
 }

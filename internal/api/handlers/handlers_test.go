@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"log_stash_lite/internal/config"
 	"log_stash_lite/internal/elastic"
 	"log_stash_lite/internal/parser"
 	"log_stash_lite/internal/storage"
@@ -30,5 +31,5 @@ func newElastic(t *testing.T, handler http.HandlerFunc) *elastic.Client {
 }
 
 func newHandler(t *testing.T, es storage.Storage) *Handler {
-	return NewHandler(zap.NewNop(), es, parser.New(zap.NewNop()))
+	return NewHandler(zap.NewNop(), es, parser.New(zap.NewNop()), config.Config{})
 }

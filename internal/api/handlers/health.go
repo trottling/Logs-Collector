@@ -1,11 +1,9 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"log_stash_lite/internal/api/dto"
-	"log_stash_lite/internal/elastic"
 	"log_stash_lite/internal/health"
 )
 
@@ -17,35 +15,25 @@ import (
 // @Success 200 {object} dto.HealthResponse
 // @Failure 503 {object} dto.HealthResponse
 // @Router /health [get]
-func (h *Handler) HandleHealth(w http.ResponseWriter, _ *http.Request) {
-
-	// Check elastic health if underlying storage is elastic
-	esClient, ok := h.es.(*elastic.Client)
-	if !ok {
-		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: "elastic client unavailable"})
-		return
-	}
-
-	res, err := esClient.ES.Info()
+func (h *Handler) HandleHealth(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	status, err := h.es.HealthCheck(ctx)
 	if err != nil {
-		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: fmt.Sprintf("Elastic health error: %s", err.Error())})
-		return
-	} else if res.StatusCode != http.StatusOK {
-		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: fmt.Sprintf("Bad elastic health status code: %d", res.StatusCode)})
+		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: status.Error})
 		return
 	}
 
 	// Get system stats
 	sysHealth, err := health.GetSystemStats()
 	if err != nil {
-		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: err.Error(), ElasticStatus: "ok"})
+		h.respond(w, http.StatusServiceUnavailable, dto.HealthResponse{Status: "bad", Error: err.Error(), ElasticStatus: status.ElasticStatus})
 		return
 	}
 
 	// Build response
 	response := dto.HealthResponse{
 		Status:        "ok",
-		ElasticStatus: "ok",
+		ElasticStatus: status.ElasticStatus,
 		SystemStatus: struct {
 			Cpu struct {
 				UsagePercent float64 `json:"usage_percent"`
