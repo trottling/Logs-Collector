@@ -8,18 +8,19 @@ import (
 	"testing"
 )
 
-func TestHandleGetLogsCount(t *testing.T) {
+func TestHandleGetLogs(t *testing.T) {
 	called := false
 	es := newElastic(t, func(w http.ResponseWriter, r *http.Request) {
 		called = true
-		fmt.Fprint(w, `{"count":3}`)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"hits":{"hits":[{"_source":{"msg":"hello"}}]}}`)
 	})
 	h := newHandler(t, es)
 
-	r := httptest.NewRequest(http.MethodGet, "/get_logs_count?level=info", nil)
+	r := httptest.NewRequest(http.MethodGet, "/get_logs?level=info&limit=1", nil)
 	w := httptest.NewRecorder()
 
-	h.handleGetLogsCount(w, r)
+	h.handleGetLogs(w, r)
 
 	if w.Code != http.StatusOK {
 		t.Fatalf("status %d", w.Code)
@@ -27,25 +28,31 @@ func TestHandleGetLogsCount(t *testing.T) {
 	if !called {
 		t.Errorf("es not called")
 	}
-	var resp map[string]int
+	var resp struct {
+		Logs  []map[string]interface{} `json:"logs"`
+		Count int                      `json:"count"`
+	}
 	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
 		t.Fatalf("decode response: %v", err)
 	}
-	if resp["count"] != 3 {
-		t.Errorf("count %d", resp["count"])
+	if resp.Count != 1 {
+		t.Errorf("count %d", resp.Count)
+	}
+	if len(resp.Logs) == 0 || resp.Logs[0]["msg"] != "hello" {
+		t.Errorf("unexpected logs %+v", resp.Logs)
 	}
 }
 
-func TestHandleGetLogsCount_ElasticError(t *testing.T) {
+func TestHandleGetLogs_ElasticError(t *testing.T) {
 	es := newElastic(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 	h := newHandler(t, es)
 
-	r := httptest.NewRequest(http.MethodGet, "/get_logs_count?level=debug", nil)
+	r := httptest.NewRequest(http.MethodGet, "/get_logs?level=debug", nil)
 	w := httptest.NewRecorder()
 
-	h.handleGetLogsCount(w, r)
+	h.handleGetLogs(w, r)
 
 	if w.Code != http.StatusInternalServerError {
 		t.Fatalf("status %d", w.Code)
