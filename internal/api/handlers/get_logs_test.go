@@ -13,7 +13,7 @@ func TestHandleGetLogsCount(t *testing.T) {
 	})
 	h := newHandler(t, es)
 
-	r := httptest.NewRequest(http.MethodGet, "/logs_stats?level=info", nil)
+	r := httptest.NewRequest(http.MethodGet, "/api/v1/logs_stats?level=info", nil)
 	w := httptest.NewRecorder()
 
 	h.handleLogStats(w, r)

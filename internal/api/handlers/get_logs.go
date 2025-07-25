@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"log_stash_lite/internal/api/dto"
@@ -14,31 +13,27 @@ import (
 func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetLogsRequest
 
+	var q struct {
+		Limit  int `schema:"limit"`
+		Offset int `schema:"offset"`
+	}
+
+	if err := queryDecoder.Decode(&q, r.URL.Query()); err != nil {
+		h.log.Error("failed to decode query", zap.Error(err))
+		h.respond(w, http.StatusBadRequest, "invalid query")
+		return
+	}
+
 	filters := make(map[string]string)
-	// Parse query params
 	for key, values := range r.URL.Query() {
-		if len(values) > 0 {
+		if len(values) > 0 && key != "limit" && key != "offset" {
 			filters[key] = values[0]
 		}
 	}
 
-	// Parse limit param
-	limit := 0
-	if l, ok := filters["limit"]; ok {
-		fmt.Sscanf(l, "%d", &limit)
-		delete(filters, "limit")
-	}
-
-	// Parse offset param
-	offset := 0
-	if o, ok := filters["offset"]; ok {
-		fmt.Sscanf(o, "%d", &offset)
-		delete(filters, "offset")
-	}
-
 	req.Filters = filters
-	req.Limit = limit
-	req.Offset = offset
+	req.Limit = q.Limit
+	req.Offset = q.Offset
 	// Validate request
 	if err := validation.Validate.Struct(&req); err != nil {
 		h.log.Error("validation error", zap.Error(err))

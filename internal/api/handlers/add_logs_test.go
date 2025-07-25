@@ -22,7 +22,7 @@ func TestHandleAddLogs(t *testing.T) {
 		"logs":       []map[string]interface{}{{"a": 1}},
 	}
 	b, _ := json.Marshal(reqBody)
-	r := httptest.NewRequest(http.MethodPost, "/add_logs", bytes.NewReader(b))
+	r := httptest.NewRequest(http.MethodPost, "/api/v1/add_logs", bytes.NewReader(b))
 	w := httptest.NewRecorder()
 
 	h.handleAddLogs(w, r)

@@ -6,6 +6,7 @@ require (
 	github.com/elastic/go-elasticsearch/v9 v9.0.0
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-playground/validator/v10 v10.27.0
+	github.com/gorilla/schema v1.4.1
 	github.com/shirou/gopsutil/v3 v3.24.5
 	go.uber.org/zap v1.27.0
 )

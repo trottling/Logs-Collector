@@ -29,7 +29,10 @@ func main() {
 
 	r := chi.NewRouter()
 	h := handlers.NewHandler(log, es, pr)
-	h.RegisterRoutes(r)
+
+	api := chi.NewRouter()
+	h.RegisterRoutes(api)
+	r.Mount("/api/v1", api)
 
 	server := &http.Server{
 		Addr:    cfg.ListenAddr,
