@@ -25,7 +25,7 @@ func TestHandleAddLog(t *testing.T) {
 	r := httptest.NewRequest(http.MethodPost, "/add_log", bytes.NewReader(b))
 	w := httptest.NewRecorder()
 
-	h.handleAddLog(w, r)
+	h.HandleAddLog(w, r)
 
 	if w.Code != http.StatusCreated {
 		t.Fatalf("status %d", w.Code)
@@ -49,7 +49,7 @@ func TestHandleAddLog_ElasticError(t *testing.T) {
 	r := httptest.NewRequest(http.MethodPost, "/add_log", bytes.NewReader(b))
 	w := httptest.NewRecorder()
 
-	h.handleAddLog(w, r)
+	h.HandleAddLog(w, r)
 
 	if w.Code != http.StatusInternalServerError {
 		t.Fatalf("status %d", w.Code)

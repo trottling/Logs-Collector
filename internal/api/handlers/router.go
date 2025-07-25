@@ -1,15 +1,29 @@
 package handlers
 
 import (
+	"log_stash_lite/internal/api/middleware"
+
 	"github.com/go-chi/chi/v5"
-	"github.com/swaggo/http-swagger"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-// RegisterRoutes registers all API routes
-func (h *Handler) RegisterRoutes(r chi.Router) {
-	r.Post("/add_log", h.handleAddLog)
-	r.Post("/add_logs", h.handleAddLogs)
-	r.Get("/get_logs", h.handleGetLogs)
-	r.Get("/logs_stats", h.handleLogStats)
+// NewRouter creates and configures a router with public and protected routes
+func NewRouter(h *Handler, jwtSecret []byte) *chi.Mux {
+	r := chi.NewRouter()
+
+	// Public routes
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
+	r.Get("/auth/token", h.HandleAuthToken)
+	r.Get("/health", h.HandleHealth)
+
+	// Protected routes
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.JWTAuthMiddleware(jwtSecret))
+		r.Post("/add_log", h.HandleAddLog)
+		r.Post("/add_logs", h.HandleAddLogs)
+		r.Get("/get_logs", h.HandleGetLogs)
+		r.Get("/get_logs_count", h.HandleGetLogsCount)
+	})
+
+	return r
 }

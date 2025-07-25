@@ -9,6 +9,7 @@ type Config struct {
 	ElasticUsername string
 	ElasticPassword string
 	LogLevel        string
+	JWTSecret       string
 }
 
 // Load loads config from environment variables
@@ -19,6 +20,7 @@ func Load() Config {
 		ElasticUsername: getEnv("ELASTIC_USERNAME", "elastic"),
 		ElasticPassword: getEnv("ELASTIC_PASSWORD", "change_me"),
 		LogLevel:        getEnv("LOG_LEVEL", "info"),
+		JWTSecret:       getEnv("JWT_SECRET", "changeme"),
 	}
 }
 

@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// handleGetLogsCount returns only count of logs by filters
+// HandleGetLogsCount returns only count of logs by filters
 func (h *Handler) handleGetLogsCountTest(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetLogsCountRequest
 

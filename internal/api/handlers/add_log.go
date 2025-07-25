@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// HandleAddLog
 // @Summary Add a log entry
 // @Description Adds a single log entry to storage
 // @Tags logs
@@ -19,8 +20,9 @@ import (
 // @Success 201 {object} dto.AddLogResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
+// @Security BearerAuth
 // @Router /add_log [post]
-func (h *Handler) handleAddLog(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleAddLog(w http.ResponseWriter, r *http.Request) {
 	var req dto.AddLogRequest
 
 	// Decode request body

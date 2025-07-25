@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// HandleGetLogs
 // @Summary Get logs
 // @Description Returns logs with filters and limit
 // @Tags logs
@@ -21,8 +22,9 @@ import (
 // @Success 200 {object} dto.GetLogsResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
+// @Security BearerAuth
 // @Router /get_logs [get]
-func (h *Handler) handleGetLogs(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleGetLogs(w http.ResponseWriter, r *http.Request) {
 	var req dto.GetLogsRequest
 
 	filters := make(map[string]string)

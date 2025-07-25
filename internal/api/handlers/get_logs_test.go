@@ -21,7 +21,7 @@ func TestHandleGetLogs(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/get_logs?level=info&limit=1", nil)
 	w := httptest.NewRecorder()
 
-	h.handleGetLogs(w, r)
+	h.HandleGetLogs(w, r)
 	if w.Code != http.StatusOK {
 		t.Fatalf("status %d", w.Code)
 	}
@@ -56,7 +56,7 @@ func TestHandleGetLogs_ElasticError(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/get_logs?level=debug", nil)
 	w := httptest.NewRecorder()
 
-	h.handleGetLogs(w, r)
+	h.HandleGetLogs(w, r)
 	if w.Code != http.StatusInternalServerError {
 		t.Fatalf("status %d", w.Code)
 	}

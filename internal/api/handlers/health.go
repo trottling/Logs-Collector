@@ -9,6 +9,7 @@ import (
 	"log_stash_lite/internal/health"
 )
 
+// HandleHealth
 // @Summary Health check
 // @Description Returns health status of the service and system
 // @Tags health
@@ -16,7 +17,7 @@ import (
 // @Success 200 {object} dto.HealthResponse
 // @Failure 503 {object} dto.HealthResponse
 // @Router /health [get]
-func (h *Handler) handleHealth(w http.ResponseWriter, _ *http.Request) {
+func (h *Handler) HandleHealth(w http.ResponseWriter, _ *http.Request) {
 
 	// Check elastic health if underlying storage is elastic
 	esClient, ok := h.es.(*elastic.Client)

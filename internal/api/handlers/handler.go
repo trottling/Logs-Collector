@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log_stash_lite/internal/config"
 	"net/http"
 
 	"log_stash_lite/internal/parser"
@@ -15,16 +16,12 @@ type Handler struct {
 	log *zap.Logger
 	pr  *parser.LogParser
 	es  storage.Storage
+	cfg config.Config
 }
 
 // NewHandler creates a new Handler instance
-func NewHandler(log *zap.Logger, es storage.Storage, pr *parser.LogParser) *Handler {
-	return &Handler{log: log, es: es, pr: pr}
-}
-
-// handleLogStats returns log statistics (stub)
-func (h *Handler) handleLogStats(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+func NewHandler(log *zap.Logger, es storage.Storage, pr *parser.LogParser, cfg config.Config) *Handler {
+	return &Handler{log: log, es: es, pr: pr, cfg: cfg}
 }
 
 // respond sends a JSON response

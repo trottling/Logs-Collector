@@ -17,7 +17,6 @@ import (
 	"log_stash_lite/internal/elastic"
 	"log_stash_lite/internal/logger"
 
-	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
@@ -30,10 +29,15 @@ func main() {
 		log.Fatal("failed to create elastic client", zap.Error(err))
 	}
 
-	r := chi.NewRouter()
 	var store storage.Storage = es
-	h := handlers.NewHandler(log, store, pr)
-	h.RegisterRoutes(r)
+	h := handlers.NewHandler(log, store, pr, cfg)
+
+	jwtSecret := cfg.JWTSecret
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET env variable is required")
+	}
+
+	r := handlers.NewRouter(h, []byte(jwtSecret))
 
 	server := &http.Server{
 		Addr:    cfg.ListenAddr,
