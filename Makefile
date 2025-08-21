@@ -1,41 +1,19 @@
-APP_NAME := log_stash_lite
-DOCKER_IMAGE := $(APP_NAME):latest
-DOCKER_COMPOSE := docker compose
-GO_BUILD := go build -o $(APP_NAME)
 
-.PHONY: all build run logs stop down restart clean rebuild
+SHELL := /bin/bash
 
-all: build
+.PHONY: up down build tidy gen test
 
-build:
-	@echo "🚧 Building Go binary..."
-	$(GO_BUILD) ./cmd/main.go
-
-docker-build:
-	@echo "📦 Building Docker image..."
-	docker build -t $(DOCKER_IMAGE) .
-
-run:
-	@echo "🚀 Starting containers..."
-	$(DOCKER_COMPOSE) up -d
-
-stop:
-	@echo "⛔ Stopping containers..."
-	$(DOCKER_COMPOSE) stop
+up:
+	docker compose -f infra/docker-compose.yml up -d
 
 down:
-	@echo "🔥 Shutting down and removing containers..."
-	$(DOCKER_COMPOSE) down -v
+	docker compose -f infra/docker-compose.yml down -v
 
-restart: down run
+tidy:
+	go mod tidy
 
-logs:
-	@echo "📖 Logs:"
-	$(DOCKER_COMPOSE) logs -f app
+build:
+	go build ./...
 
-clean:
-	@echo "🧽 Cleaning up..."
-	rm -f $(APP_NAME)
-	docker rmi $(DOCKER_IMAGE) || true
-
-rebuild: clean build docker-build restart
+test:
+	go test ./... -count=1

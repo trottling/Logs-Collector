@@ -1,0 +1,120 @@
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: logs
+      POSTGRES_PASSWORD: logs
+      POSTGRES_DB: logs
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logs"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:8.2
+    ports: ["6379:6379"]
+
+  redpanda: # Kafka-compatible broker without ZK
+    image: redpandadata/redpanda:latest
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --check=false
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.2
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports: ["9200:9200"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.1.12
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports: ["5601:5601"]
+    depends_on:
+      - elasticsearch
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports: ["16686:16686"]
+
+  auth:
+    build:
+      context: ..
+      dockerfile: services/auth/Dockerfile
+      args: { SVC_PATH: services/auth }
+    environment:
+      - AUTH_ADDR=:8001
+      - DATABASE_URL=postgres://logs:logs@postgres:5432/logs?sslmode=disable
+      - JWT_SECRET=change_me
+      - ROOT_LOGIN=root
+      - ROOT_PASSWORD=root
+    ports: [ "8001:8001" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ingest:
+    build:
+      context: ..
+      dockerfile: services/ingest/Dockerfile
+      args: { SVC_PATH: services/ingest }
+    environment:
+      - INGEST_ADDR=:8002
+      - KAFKA_BROKER=redpanda:9092
+    ports: ["8002:8002"]
+    depends_on:
+      - redpanda
+      - auth
+
+  storage:
+    build:
+      context: ..
+      dockerfile: services/storage/Dockerfile
+      args: { SVC_PATH: services/storage }
+    environment:
+      - STORAGE_ADDR=:8003
+      - KAFKA_BROKER=redpanda:9092
+      - ELASTIC_ADDR=http://elasticsearch:9200
+    ports: ["8003:8003"]
+    depends_on:
+      - redpanda
+      - elasticsearch
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: services/gateway/Dockerfile
+      args: { SVC_PATH: services/gateway }
+    environment:
+      - GATEWAY_ADDR=:8000
+      - AUTH_URL=http://auth:8001
+      - INGEST_URL=http://ingest:8002
+      - STORAGE_URL=http://storage:8003
+    ports: ["8000:8000"]
+    depends_on:
+      - auth
+      - ingest
+      - storage
+
+networks:
+  default:
+    name: logs_net
