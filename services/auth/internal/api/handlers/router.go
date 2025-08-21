@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"time"
 
+	"logs-collector/pkg/dto/auth"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	dto "logs-collector/pkg/dto/auth"
 	mw "logs-collector/pkg/middleware"
 	"logs-collector/services/auth/internal/jwt"
 	"logs-collector/services/auth/internal/store"
@@ -47,17 +48,17 @@ func NewRouter(st *store.Store, j *jwt.Manager) http.Handler {
 
 		// CRUD пользователей: доступно admin и root
 		r.Route("/v1/users", func(r chi.Router) {
-			r.With(mw.RequireRole(dto.RoleAdmin)).Post("/", h.CreateUser)
-			r.With(mw.RequireRole(dto.RoleAdmin)).Get("/", h.ListUsers)
-			r.With(mw.RequireRole(dto.RoleAdmin)).Get("/{id}", h.GetUser)
-			r.With(mw.RequireRole(dto.RoleAdmin)).Patch("/{id}", h.UpdateUser)
-			r.With(mw.RequireRole(dto.RoleAdmin)).Delete("/{id}", h.DeleteUser)
+			r.With(mw.RequireRole(auth_dto.RoleAdmin)).Post("/", h.CreateUser)
+			r.With(mw.RequireRole(auth_dto.RoleAdmin)).Get("/", h.ListUsers)
+			r.With(mw.RequireRole(auth_dto.RoleAdmin)).Get("/{id}", h.GetUser)
+			r.With(mw.RequireRole(auth_dto.RoleAdmin)).Patch("/{id}", h.UpdateUser)
+			r.With(mw.RequireRole(auth_dto.RoleAdmin)).Delete("/{id}", h.DeleteUser)
 		})
 
 		// CRUD админов: только root
 		r.Route("/v1/admins", func(r chi.Router) {
-			r.With(mw.RequireRole(dto.RoleRoot)).Patch("/{id}/promote", h.PromoteToAdmin) // повысить юзера до admin
-			r.With(mw.RequireRole(dto.RoleRoot)).Patch("/{id}/demote", h.DemoteToUser)    // понизить админа до user
+			r.With(mw.RequireRole(auth_dto.RoleRoot)).Patch("/{id}/promote", h.PromoteToAdmin) // повысить юзера до admin
+			r.With(mw.RequireRole(auth_dto.RoleRoot)).Patch("/{id}/demote", h.DemoteToUser)    // понизить админа до user
 		})
 	})
 
