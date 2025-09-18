@@ -12,9 +12,11 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gLogger "gorm.io/gorm/logger"
 
 	"logs-collector/services/auth/internal/config"
 	"logs-collector/services/auth/internal/jwt"
@@ -24,6 +26,11 @@ import (
 func main() {
 	// Загрузка конфига
 	cfg := config.Load()
+
+	zapCfg := zap.NewProductionConfig()
+	zapCfg.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
+	logger, _ := zapCfg.Build()
+	defer logger.Sync()
 
 	// GORM подключение
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{

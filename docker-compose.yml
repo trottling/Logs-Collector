@@ -17,7 +17,7 @@ services:
     image: redis:8.2
     ports: ["6379:6379"]
 
-  redpanda: # Kafka-compatible broker without ZK
+  redpanda:
     image: redpandadata/redpanda:latest
     command:
       - redpanda

@@ -8,11 +8,15 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-playground/validator/v10"
+	"go.uber.org/zap"
 
 	mw "logs-collector/pkg/middleware"
 	"logs-collector/services/auth/internal/jwt"
 	"logs-collector/services/auth/internal/store"
 )
+
+var Validate = validator.New()
 
 type Handlers struct {
 	store *store.Store
@@ -23,11 +27,12 @@ func NewHandlers(s *store.Store, j *jwt.Manager) *Handlers {
 	return &Handlers{store: s, jwt: j}
 }
 
-func NewRouter(st *store.Store, j *jwt.Manager) http.Handler {
+func NewRouter(st *store.Store, j *jwt.Manager, log *zap.Logger) http.Handler {
 	h := NewHandlers(st, j)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID, middleware.Recoverer, middleware.Timeout(30*time.Second))
+	r.Use(mw.RequestLogger(log))
 
 	// health
 	r.Get("/health", h.Health)

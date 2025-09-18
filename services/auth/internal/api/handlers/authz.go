@@ -37,7 +37,7 @@ func (h *Handlers) Authz(next http.Handler) http.Handler {
 		claims := tok.Claims.(jwtlib.MapClaims)
 		role, _ := claims["role"].(string)
 		ctx := context.WithValue(r.Context(), ctxClaims{}, claims)
-		ctx = context.WithValue(ctx, mw.RoleCtxKey(), role) // положили роль для RequireRole
+		ctx = context.WithValue(ctx, mw.RoleCtxKey(), role)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
